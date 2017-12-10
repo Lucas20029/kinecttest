@@ -92,24 +92,26 @@ namespace WpfApplication3
         #endregion
 
         //----性能优化点1：使用WriteableBitmap，避免重复创建的开销----
-        private WriteableBitmap depthImageBitMap;
+        private WriteableBitmap writableBitMapDepthImage;
         private Int32Rect depthImageBitmapRect;
         private Int32Rect depthImageNormalizeBitmapRect;
         private int depthImageStride; //
         //------------------------------------------------------------
         private void InitializeKinectSensor(KinectSensor kinectSensor)
-        {
+        {//此方法只会在KinectReady的时候被调用一次，用于初始化
             if (kinectSensor != null)
             {
+                //获取深度数据流的引用
                 DepthImageStream depthStream = kinectSensor.DepthStream;
                 depthStream.Enable();
 
-                depthImageBitMap = new WriteableBitmap(depthStream.FrameWidth, depthStream.FrameHeight, 96, 96, PixelFormats.Gray16, null);
+                writableBitMapDepthImage = new WriteableBitmap(depthStream.FrameWidth, depthStream.FrameHeight, 96, 96, PixelFormats.Gray16, null);
                 depthImageBitmapRect = new Int32Rect(0, 0, depthStream.FrameWidth, depthStream.FrameHeight);
+                //跨行的步长（字节）：深度图像宽度多少像素*每像素多少字节
                 depthImageStride = depthStream.FrameWidth * depthStream.FrameBytesPerPixel;
-
-                ColorImageElement.Source = depthImageBitMap;
-                kinectSensor.DepthFrameReady += kinectSensor_DepthFrameReady;
+                //指定窗体上的图像显示框的数据源
+                ColorImageElement.Source = writableBitMapDepthImage;
+                kinectSensor.DepthFrameReady += kinectSensor_DepthFrameReady; //每一帧调用一次
                 kinectSensor.Start();
             }
         }
@@ -119,10 +121,10 @@ namespace WpfApplication3
             {
                 if (depthFrame != null)
                 {
-                    short[] depthPixelDate = new short[depthFrame.PixelDataLength];
-                    depthFrame.CopyPixelDataTo(depthPixelDate);
+                    short[] depthPixelDatas = new short[depthFrame.PixelDataLength];
+                    depthFrame.CopyPixelDataTo(depthPixelDatas);
                     
-                    depthImageBitMap.WritePixels(depthImageBitmapRect, depthPixelDate, depthImageStride, 0);
+                    writableBitMapDepthImage.WritePixels(depthImageBitmapRect, depthPixelDatas, depthImageStride, 0);
                 }
             }
         }
