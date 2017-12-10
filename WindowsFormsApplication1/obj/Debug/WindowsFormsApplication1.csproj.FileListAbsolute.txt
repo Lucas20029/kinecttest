@@ -1,0 +1,9 @@
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csprojResolveAssemblyReference.cache
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Form1.resources
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+E:\Learning\Kinect\Step2\kinecttest\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
