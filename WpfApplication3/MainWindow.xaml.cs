@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -125,19 +126,20 @@ namespace WpfApplication3
                 {
                     short[] depthPixelDatas = new short[depthFrame.PixelDataLength];
                     depthFrame.CopyPixelDataTo(depthPixelDatas);
-
-                    writableBitMapDepthImage.WritePixels(depthImageBitmapRect, depthPixelDatas, depthImageStride, 0);
                     
                     if (catchFlag)
                     {
                         var result = imageMerge.Merge(depthPixelDatas);
                         if(result!=null)
-                        {
+                        {//把图片叠加后的结果显示在控件上
                             writableBitMapDepthImage.WritePixels(depthImageBitmapRect, result, depthImageStride, 0);
                             catchFlag = false;
+                            SaveImageFile();
                         }
-                        SaveImageFile();
+                        
                     }
+                    writableBitMapDepthImage.WritePixels(depthImageBitmapRect, depthPixelDatas, depthImageStride, 0);
+
                 }
 
             }
@@ -147,6 +149,16 @@ namespace WpfApplication3
         private void MergePictureButton_Click(object sender, RoutedEventArgs e)
         {
             catchFlag = true;
+            //if(catchFlag)
+            //{
+            //    catchFlag = false;
+            //    BtnMerge.Content = "点击开始截图";
+            //}
+            //else
+            //{
+            //    catchFlag = true;
+            //    BtnMerge.Content = "正在截图。点击结束。。";
+            //}
         }
         private void TakePictureButton_Click(object sender, RoutedEventArgs e)
         {
@@ -162,10 +174,11 @@ namespace WpfApplication3
             using (FileStream savedSnapshot = new FileStream(fileName, FileMode.CreateNew))
             {
                 BitmapSource image = (BitmapSource)ColorImageElement.Source;
-                JpegBitmapEncoder jpgEncoder = new JpegBitmapEncoder();
-                jpgEncoder.QualityLevel = 70;
-                jpgEncoder.Frames.Add(BitmapFrame.Create(image));
-                jpgEncoder.Save(savedSnapshot);
+                BmpBitmapEncoder imageEncoder = new BmpBitmapEncoder();
+                //JpegBitmapEncoder imageEncoder = new JpegBitmapEncoder();
+                //imageEncoder.QualityLevel = 70;
+                imageEncoder.Frames.Add(BitmapFrame.Create(image));
+                imageEncoder.Save(savedSnapshot);
 
                 savedSnapshot.Flush();
                 savedSnapshot.Close();
@@ -182,7 +195,15 @@ namespace WpfApplication3
                 return -1;
             return (int)((source - lower) * Int16.MaxValue / (upper - lower));
         }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            catchFlag = true;
+        }
     }
+
+
+
 
     public static class Extensions
     {
@@ -191,14 +212,19 @@ namespace WpfApplication3
             return source >> DepthImageFrame.PlayerIndexBitmaskWidth;
         }
     }
-
+    
+    /// <summary>
+    /// 图片叠加器：可以在构造时，指定叠加次数。重复调用其叠加方法，当达到指定的叠加次数时，返回叠加后的图片，叠加计数清零。其他时候返回null
+    /// </summary>
     public class ImageMergeProvider
     {
         public short[] MergedResult { get; private set; }
-        int Times { get; set; }
+        public int Times { get; private set; }
         public ImageMergeProvider(int length, int times)
         {
+            //初始化为全-1的数组
             MergedResult = Enumerable.Repeat<short>(-1, length).ToArray();
+            //指定叠加次数
             Times = times;
         }
         int currentTime = 0;
@@ -207,7 +233,8 @@ namespace WpfApplication3
             currentTime++;
             if(currentTime<Times)  //如果当前次数小于规定次数
             {
-                MergeToResult(source);
+                //MergeToResult(source);
+                MergeWithTime(source, currentTime);
                 return null;
             }
             else
@@ -216,7 +243,28 @@ namespace WpfApplication3
                 return MergedResult;
             }
         }
-        private short[] MergeToResult(short[] source)
+        private short[] MergeWithTime(short[] source, int weight)
+        {
+            int max = Math.Max(source.Length, MergedResult.Length);
+            for (int i = 0; i < max; i++)
+            {
+                if (source[i] > 0)
+                {
+                    if (MergedResult[i] > 0)
+                    {
+                        MergedResult[i] = (short)((source[i] + (weight - 1) * MergedResult[i]) / weight);
+                        //均值
+                        //MergedResult[i] = (short)((source[i] + MergedResult[i]) / 2);
+                    }
+                    else
+                    {
+                        MergedResult[i] = source[i];
+                    }
+                }
+            }
+            return MergedResult;
+        }
+        private short[] MergeToResult(short[] source) 
         {
             int max = Math.Max(source.Length, MergedResult.Length);
             for(int i=0;i<max;i++)

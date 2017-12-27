@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApplication3"
         mc:Ignorable="d"
+        PreviewKeyDown="Window_PreviewKeyDown"
         Title="MainWindow" Height="402.5" Width="656.923">
     <Grid>
         <Image x:Name="ColorImageElement" Width="500" Height="314" HorizontalAlignment="Left" VerticalAlignment="Top"></Image>
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top">
             <Button Content="Take Picture" Click="TakePictureButton_Click" />
-            <Button Content="Merge Picture" Click="MergePictureButton_Click" />
+            <Button Content="Screen Shot" Click="MergePictureButton_Click" Name="BtnMerge" Height="70" Width="114" />
             <Label Name="LabelPixelData" FontSize="20" />
         </StackPanel>
     </Grid>
